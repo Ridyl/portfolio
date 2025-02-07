@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
 import Box from '@mui/material/Box';
@@ -15,21 +15,24 @@ import { DialogTitle, Grid2 } from '@mui/material';
 export default function ContactForm() {
 	const [open, setOpen] = useState(false);
 	const [pop, setPop] = useState(false);
+	const [user, setUser] = useState(null);
+
 	const handleOpen = () => setOpen(true);
 	const handleClose = () => setOpen(false);
 	const handlePopOpen = () => setPop(true);
 	const handlePopClose = () => setPop(false);
 
-	const handleSubmit = () => {
-		handleClose();
-		handlePopOpen();
-	};
+	useEffect(() => {
+		if (user) {
+			handlePopOpen();
+		}
+	}, [user]);
 
 	const validation = yup.object({
-		firstName: yup.string('First name').required('First name is required'),
-		lastName: yup.string('Last name'),
+		firstName: yup.string().required('First name is required'),
+		lastName: yup.string(),
 		email: yup
-			.string('Enter your email')
+			.string()
 			.email('Enter a valid email')
 			.required('Email is required'),
 	});
@@ -42,7 +45,8 @@ export default function ContactForm() {
 		},
 		validationSchema: validation,
 		onSubmit: (values) => {
-			alert(JSON.stringify(values, null, 3));
+			setUser(values);
+			handleClose();
 		},
 	});
 
@@ -58,6 +62,20 @@ export default function ContactForm() {
 			</IconButton>
 		</>
 	);
+
+	const PopUp = () => {
+		if (user) {
+			return (
+				<Snackbar
+					open={pop}
+					autoHideDuration={10000}
+					onClose={handlePopClose}
+					message={`Thank you ${user.firstName}, I will reach out to you soon!`}
+					action={toast}
+				/>
+			);
+		}
+	};
 
 	return (
 		<>
@@ -76,7 +94,7 @@ export default function ContactForm() {
 					Contact Me!
 				</Button>
 			</Box>
-			<Dialog open={open}>
+			<Dialog open={open} onClose={handleClose}>
 				<DialogTitle>Send Me Your Information</DialogTitle>
 				<DialogContent>
 					<form onSubmit={formik.handleSubmit} id='form'>
@@ -123,17 +141,12 @@ export default function ContactForm() {
 							<Grid2 container spacing={2} offset={{ md: 'auto' }}>
 								<Button
 									color='primary'
-									variant='contained'
+									variant='outlined'
 									onClick={handleClose}
 								>
 									Cancel
 								</Button>
-								<Button
-									color='secondary'
-									variant='contained'
-									type='button'
-									onClick={handleSubmit}
-								>
+								<Button color='secondary' variant='contained' type='submit'>
 									Submit
 								</Button>
 							</Grid2>
@@ -141,15 +154,7 @@ export default function ContactForm() {
 					</form>
 				</DialogContent>
 			</Dialog>
-			<div>
-				<Snackbar
-					open={pop}
-					autoHideDuration={10000}
-					onClose={handlePopClose}
-					message='Thank you ${name}, I will reach out to you soon!'
-					action={toast}
-				/>
-			</div>
+			<PopUp />
 		</>
 	);
 }

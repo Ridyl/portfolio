@@ -6,6 +6,8 @@ import About from './components/About';
 import Projects from './components/Projects';
 import Footer from './components/Footer';
 import './App.css';
+import client from '../directus/directus';
+import { readItems } from '@directus/sdk';
 
 const myTheme = createTheme({
 	palette: {
@@ -23,7 +25,20 @@ const myTheme = createTheme({
 	},
 });
 
+const result = async () => {
+	try {
+		const data = await client.request(readItems('user_data'));
+		console.log(data);
+	} catch (error) {
+		console.log(error);
+	}
+};
+
+console.log(result);
+
 function App() {
+	result();
+
 	return (
 		<ThemeProvider theme={myTheme}>
 			<CssBaseline />

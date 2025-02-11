@@ -9,8 +9,10 @@ import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import Snackbar from '@mui/material/Snackbar';
-
 import { DialogTitle, Grid2 } from '@mui/material';
+
+import client from '../../directus/directus';
+import { createItem } from '@directus/sdk';
 
 export default function ContactForm() {
 	const [open, setOpen] = useState(false);
@@ -25,6 +27,22 @@ export default function ContactForm() {
 	useEffect(() => {
 		if (user) {
 			handlePopOpen();
+			const sendUser = async () => {
+				const dataSend = {
+					first_name: user.firstName,
+					last_name: user.lastName,
+					email: user.email,
+				};
+				try {
+					const response = await client.request(
+						createItem('user_data', dataSend)
+					);
+					console.log('Data sent:', response);
+				} catch (error) {
+					console.error('Error sending data:', error);
+				}
+			};
+			sendUser();
 		}
 	}, [user]);
 
